@@ -5,16 +5,42 @@ const cors = require("cors")
 const app = express();
 const port = 9000;
 const { uuid } = require("uuidv4");
+const fs = require("fs");
+const { check, validationResult } = require("express-validator");
 
 // setup middleware
 app.use(bodyParser.json());
 app.use(cors());
 
+// data is located outside of api folder
+// to prevent automated server restart issued by nodemon
+let filepath = "../data/db.json";
+
 //
 var _dishes = [];
 
+function loadFromFile() {
+    try {
+        _dishes = JSON.parse(fs.readFileSync(filepath));
+    } catch (err) {
+        console.log(`file not found at ${filepath}`);
+    }
+}
+
+function saveToFile() {
+    const jsonContent = JSON.stringify(_dishes);
+    fs.writeFileSync(filepath, jsonContent, "utf8", function (err) {
+        if (err) {
+            return console.log(err);
+        }
+        console.log(`data saved to ${filepath}`);
+    });
+}
+
 // get dishes
 router.get('/dishes', (req, res) => {
+    loadFromFile();
+
     res.json({
         status: "OK",
         data: _dishes
@@ -24,6 +50,8 @@ router.get('/dishes', (req, res) => {
 // clear dishes
 router.get('/dishes/clear', (req, res) => {
     _dishes = [];
+
+    saveToFile();
     
     res.json({
         status: "OK"
@@ -41,7 +69,16 @@ router.get('/dishes/:_id', (req, res) => {
 });
 
 // insert/update dish
-router.put('/dishes', (req, res) => {
+router.put('/dishes', [
+    check('active').isBoolean(), // non-strict validation will also accept "true"/"false" and 0/1
+    check('waitTime').isNumeric()
+], (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
     if (req.body == null) {
         res.json({
             status: "Failed",
@@ -79,6 +116,8 @@ router.put('/dishes', (req, res) => {
             }
         }
 
+        saveToFile();
+
         res.json({
             status: status,
             data: dish
@@ -92,6 +131,8 @@ router.delete('/dishes/:_id', (req, res) => {
 
     if (dishIndex !== -1) {
         _dishes.splice(dishIndex, 1);
+
+        saveToFile();
     }
 
     res.json({
