@@ -59,6 +59,6 @@ Here I list features that were outside the scope of this project due to time con
 * Restrict certain features (e.g. clear dishes) to logged in users or authorized users (e.g. admin)
 * Edit values directly in the data cells (just like the status)
 * Multi-selection of entries to edit/delete several dishes at once
-* Lazy loading of the dishes in case the database is expected to be
+* Lazy loading of the dishes in case the database is expected to be large
 * Validation of requests in the backend to avoid problems that are not handled (enough) by the frontend 
 
