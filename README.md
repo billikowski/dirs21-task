@@ -62,3 +62,4 @@ Here I list features that were outside the scope of this project due to time con
 * Lazy loading of the dishes in case the database is expected to be large
 * Validation of requests in the backend to avoid problems that are not handled (enough) by the frontend 
 
+![](https://i.imgur.com/0OpwNPh.png)
